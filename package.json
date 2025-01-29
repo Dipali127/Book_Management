@@ -1,0 +1,19 @@
+{
+  "name": "project-booksmanagementgroup14",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index.js"
+  },
+  "author": "Group14",
+  "license": "ISC",
+  "description": "Project for managing and organizing books",
+  "dependencies": {
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "moment": "^2.30.1",
+    "mongoose": "^8.9.5",
+    "nodemon": "^3.1.9"
+  }
+}
