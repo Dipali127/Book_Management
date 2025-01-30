@@ -8,7 +8,7 @@ mongoose.connect("mongodb+srv://DipaliBohara:8076166878@cluster0.4wyyohq.mongodb
     .catch(err => console.log(err))
 
 
-const route = require('./routes/route');
+const route = require('./router/route');
 app.use('/', route);
 
 

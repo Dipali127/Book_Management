@@ -20,9 +20,9 @@ router.delete("/books/:bookId", mw.authentication, bookController.deleteBooksbyI
 
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> API's for review >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-router.post("/books/:bookId/review", reviewController.createReview)
-router.put("/books/:bookId/review/:reviewId",reviewController.updateReviewByID)
-router.delete("/books/:bookId/review/:reviewId", reviewController.deleteReview)
+router.post("/books/:bookId/review", mw.authentication, reviewController.createReview)
+router.put("/books/:bookId/review/:reviewId", mw.authentication, reviewController.updateReviewByID)
+router.delete("/books/:bookId/review/:reviewId", mw.authentication, reviewController.deleteReview)
 
 //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> API for pathParam >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

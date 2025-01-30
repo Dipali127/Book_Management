@@ -1,3 +1,4 @@
+const userModel = require('../models/userModel');
 const bookModel = require("../models/bookModel")
 const reviewModel = require("../models/reviewModel")
 const validations = require("../validator/validation")
@@ -11,7 +12,7 @@ const createReview = async (req, res) => {
 
     let bookId = req.params.bookId;
     let data = req.body;
-    const { reviewedBy, reviewedAt, rating,comment} = data;
+    const {reviewedBy, reviewedAt, rating,comment} = data;
     if (!validations.isEmpty(data)) {return res.status(400).send({ status: false, msg: "Please Enter Some Data in request body" })}
 
     if (!validations.checkObjectId(bookId)) {return res.status(400).send({ status: false, msg: "invalid bookId" })}
@@ -20,8 +21,12 @@ const createReview = async (req, res) => {
     if (!allbooks) { return res.status(404).send({ status: false, msg: "no book found" }) }
     if (allbooks.isDeleted === true) { return res.status(400).send({ status: false, msg: "book is Deleted" }) }
 
-    if (!validations.checkData(reviewedBy)) {
-      return res.status(400).send({ status: false, message: "reviewer name is required" })
+    if(!validations.checkData(reviewedBy)){
+      return res.status(400).send({status:false, message: "reviewedBy is required"});
+    }
+
+    if(!validations.checkObjectId(reviewedBy)){
+      return res.status(400).send({status:false, message: "invalid reviewer Id"})
     }
 
     if (!validations.checkData(reviewedAt)) {
@@ -88,6 +93,11 @@ const updateReviewByID = async function (req, res) {
       return res.status(404).send({ status: false, message: "review not found OR deleted already" });
     }
 
+    // Check reviewer is authoirzed to leave a review on published book.
+    if(req.decodedToken.userId !== validReview.reviewedBy.toString()){
+      return res.status(400).send({status: false, message: "reviewer is not authorised to leave a review on a book"})
+    }
+
     const { rating, comment, reviewedBy } = req.body;
     if (!validations.isEmpty(req.body)) {
       return res.status(400).send({ status: false, msg: "provide details for update" });
@@ -137,6 +147,11 @@ const deleteReview = async (req, res) => {
   if (!validReview || validReview.isDeleted == true) {
 
     return res.status(404).send({ status: false, message: "review not found OR deleted already" });
+  }
+
+  // Check reviewer is authoirzed to leave a review on published book.
+  if(req.decodedToken.userId !== validReview.reviewedBy.toString()){
+    return res.status(400).send({status: false, message: "reviewer is not authorised to leave a review on a book"})
   }
 
   // delete the review
