@@ -1,316 +1,489 @@
-## Project - Books Management
 
-### Key points
-- Create a group database `groupXDatabase`. You can clean the db you previously used and resue that.
-- This time each group should have a *single git branch*. Coordinate amongst yourselves by ensuring every next person pulls the code last pushed by a team mate. You branch will be checked as part of the demo. Branch name should follow the naming convention `project/booksManagementGroupX`
-- Follow the naming conventions exactly as instructed.
+# Book Management
 
-### Models
-- User Model
-```yaml
-{ 
-  title: {string, mandatory, enum[Mr, Mrs, Miss]},
-  name: {string, mandatory},
-  phone: {string, mandatory, unique},
-  email: {string, mandatory, valid email, unique}, 
-  password: {string, mandatory, minLen 8, maxLen 15},
-  address: {
-    street: {string},
-    city: {string},
-    pincode: {string}
-  },
-  createdAt: {timestamp},
-  updatedAt: {timestamp}
-}
-```
+Book Management is a backend application designed for users to manage their published books. It allows users to publish their books using a unique ISBN (International Standard Book Number) and perform CRUD (Create, Read, Update, Delete) operations on their published books. Additionally, reviewers can engage with the application by providing ratings and comments on the books.
 
-- Books Model
-```yaml
-{ 
-  title: {string, mandatory, unique},
-  excerpt: {string, mandatory}, 
-  userId: {ObjectId, mandatory, refs to user model},
-  ISBN: {string, mandatory, unique},
-  category: {string, mandatory},
-  subcategory: {string, mandatory},
-  reviews: {number, default: 0, comment: Holds number of reviews of this book},
-  deletedAt: {Date, when the document is deleted}, 
-  isDeleted: {boolean, default: false},
-  releasedAt: {Date, mandatory, format("YYYY-MM-DD")},
-  createdAt: {timestamp},
-  updatedAt: {timestamp},
-}
-```
+## Features
 
-- Review Model (Books review)
-```yaml
-{
-  bookId: {ObjectId, mandatory, refs to book model},
-  reviewedBy: {string, mandatory, default 'Guest', value: reviewer's name},
-  reviewedAt: {Date, mandatory},
-  rating: {number, min 1, max 5, mandatory},
-  review: {string, optional}
-  isDeleted: {boolean, default: false},
-}
-```
+* Users publish their books using a unique ISBN.
+* Users can create, read, update, and delete their published books.
+* Reviewers can add ratings and comments to the published books.
+* The reviewCount field on the book model is incremented when a reviewer adds a review and decremented when a review is removed.
 
-## User APIs 
-### POST /register
-- Create a user - atleast 5 users
-- Create a user document from request body.
-- Return HTTP status 201 on a succesful user creation. Also return the user document. The response should be a JSON object like [this](#successful-response-structure)
-- Return HTTP status 400 if no params or invalid params received in request body. The response should be a JSON object like [this](#error-response-structure)
+## Description
 
-### POST /login
-- Allow an user to login with their email and password.
-- On a successful login attempt return a JWT token contatining the userId, exp, iat. The response should be a JSON object like [this](#successful-response-structure)
-- If the credentials are incorrect return a suitable error message with a valid HTTP status code. The response should be a JSON object like [this](#error-response-structure)
+* Built a RESTful API in Node.js using the MVC approach with MongoDB as the database.
+* Implemented JWT (JSON Web Tokens) for authentication and authorization.
 
-## Books API
-### POST /books
-- Create a book document from request body. Get userId in request body only.
-- Make sure the userId is a valid userId by checking the user exist in the users collection.
-- Return HTTP status 201 on a succesful book creation. Also return the book document. The response should be a JSON object like [this](#successful-response-structure) 
-- Create atleast 10 books for each user
-- Return HTTP status 400 for an invalid request with a response body like [this](#error-response-structure)
+## Technology Stack
+* Backend: Node.js with Express.js
+* Database: MongoDB for storing book and review data
+* Authentication: JWT (JSON Web Tokens) for user authentication and authorization
 
-### GET /books
-- Returns all books in the collection that aren't deleted. Return only book _id, title, excerpt, userId, category, releasedAt, reviews field. Response example [here](#get-books-response)
-- Return the HTTP status 200 if any documents are found. The response structure should be like [this](#successful-response-structure) 
-- If no documents are found then return an HTTP status 404 with a response like [this](#error-response-structure) 
-- Filter books list by applying filters. Query param can have any combination of below filters.
-  - By userId
-  - By category
-  - By subcategory
-  example of a query url: books?filtername=filtervalue&f2=fv2
-- Return all books sorted by book name in Alphabatical order
+## Running Book Management application
 
-### GET /books/:bookId
-- Returns a book with complete details including reviews. Reviews array would be in the form of Array. Response example [here](#book-details-response)
-- Return the HTTP status 200 if any documents are found. The response structure should be like [this](#successful-response-structure) 
-- If the book has no reviews then the response body should include book detail as shown [here](#book-details-response-no-reviews) and an empty array for reviewsData.
-- If no documents are found then return an HTTP status 404 with a response like [this](#error-response-structure) 
+To run the `book management` application, follow these steps:
 
-### PUT /books/:bookId
-- Update a book by changing its
-  - title
-  - excerpt
-  - release date
-  - ISBN
-- Make sure the unique constraints are not violated when making the update
-- Check if the bookId exists (must have isDeleted false and is present in collection). If it doesn't, return an HTTP status 404 with a response body like [this](#error-response-structure)
-- Return an HTTP status 200 if updated successfully with a body like [this](#successful-response-structure) 
-- Also make sure in the response you return the updated book document. 
+1. Ensure that you have Node.js and npm installed on your system.
 
-### DELETE /books/:bookId
-- Check if the bookId exists and is not deleted. If it does, mark it deleted and return an HTTP status 200 with a response body with status and message.
-- If the book document doesn't exist then return an HTTP status of 404 with a body like [this](#error-response-structure) 
+2. Clone the repository to your local machine:
 
-## Review APIs
-### POST /books/:bookId/review
-- Add a review for the book in reviews collection.
-- Check if the bookId exists and is not deleted before adding the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
-- Get review details like review, rating, reviewer's name in request body.
-- Update the related book document by increasing its review count
-- Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#successful-response-structure)
+    ```bash
+    https://github.com/Dipali127/Book_Management.git
+    ```
+3. Navigate to the root directory of the project:
 
-### PUT /books/:bookId/review/:reviewId
-- Update the review - review, rating, reviewer's name.
-- Check if the bookId exists and is not deleted before updating the review. Check if the review exist before updating the review. Send an error response with appropirate status code like [this](#error-response-structure) if the book does not exist
-- Get review details like review, rating, reviewer's name in request body.
-- Return the updated book document with reviews data on successful operation. The response body should be in the form of JSON object like [this](#book-details-response)
+    ```bash
+     cd Book_Management
+    ```
 
-### DELETE /books/:bookId/review/:reviewId
-- Check if the review exist with the reviewId. Check if the book exist with the bookId. Send an error response with appropirate status code like [this](#error-response-structure) if the book or book review does not exist
-- Delete the related reivew.
-- Update the books document - decrease review count by one
+4. Install dependencies:
 
-### Authentication
-- Make sure all the book routes are protected.
 
-### Authorisation
-- Make sure that only the owner of the books is able to create, edit or delete the book.
-- In case of unauthorized access return an appropirate error message.
+    ```bash
+         npm install 
+    ```
 
-## Testing 
-- To test these apis create a new collection in Postman named Project 4 Books Management 
-- Each api should have a new request in this collection
-- Each request in the collection should be rightly named. Eg Create user, Create book, Get books etc
-- Each member of each team should have their tests in running state
+5. Start the application (run it on development mode):
 
-Refer below sample
- ![A Postman collection and request sample](assets/Postman-collection-sample.png)
+    ```bash
+    npm start
+    ```
 
-## Response
+- **Database Setup**: 
 
-### Successful Response structure
-```yaml
-{
-  status: true,
-  message: 'Success',
-  data: {
+    - Install Mongoose, the MongoDB object modeling tool for Node.js, by running the following command in your terminal:
 
-  }
-}
-```
-### Error Response structure
-```yaml
-{
-  status: false,
-  message: ""
-}
-```
+    ```bash
+    npm install mongoose
+    ```        
 
-## Collections
-## users
-```yaml
-{
-  _id: ObjectId("88abc190ef0288abc190ef02"),
-  title: "Mr",
-  name: "John Doe",
-  phone: 9897969594,
-  email: "johndoe@mailinator.com", 
-  password: "abcd1234567",
-  address: {
-    street: "110, Ridhi Sidhi Tower",
-    city: "Jaipur",
-    pincode: "400001"
-  },
-  "createdAt": "2021-09-17T04:25:07.803Z",
-  "updatedAt": "2021-09-17T04:25:07.803Z",
-}
-```
-### books
-```yaml
-{
-  "_id": ObjectId("88abc190ef0288abc190ef55"),
-  "title": "How to win friends and influence people",
-  "excerpt": "book body",
-  "userId": ObjectId("88abc190ef0288abc190ef02"),
-  "ISBN": "978-0008391331",
-  "category": "Book",
-  "subcategory": "Non fiction",
-  "isDeleted": false,
-  "reviews": 0,
-  "releasedAt": "2021-09-17"
-  "createdAt": "2021-09-17T04:25:07.803Z",
-  "updatedAt": "2021-09-17T04:25:07.803Z",
-}
-```
+## For Testing (Postman)
+* Postman extension can be used for testing !
 
-### reviews
-```yaml
-{
-  "_id": ObjectId("88abc190ef0288abc190ef88"),
-  bookId: ObjectId("88abc190ef0288abc190ef55"),
-  reviewedBy: "Jane Doe",
-  reviewedAt: "2021-09-17T04:25:07.803Z",
-  rating: 4,
-  review: "An exciting nerving thriller. A gripping tale. A must read book."
-}
-```
+## Dependencies
+* For dependencies refer Package.json
 
-## Response examples
-### Get books response
-```yaml
-{
-  status: true,
-  message: 'Books list',
-  data: [
+## Available API Routes
+### User Routes
+
+| Routes                      | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `POST /register`      | Register a new user.                       |
+| `POST /login`       | Log in an existing user.                           |
+
+### Book Routes
+
+| Routes                      | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `POST /books`      | User publish their own book.      |
+| `GET /books`       | User fetches all the published books.     |
+| `GET /books/:bookId`    | User fetches a book by its object ID.    |
+| `PUT /books/:bookId`    | User updates a published book.   |
+| `DELETE /books/:bookId`    | User deletes a published book.  |
+
+### Review Routes
+
+| Routes                      | Description                                |
+| --------------------------- | ------------------------------------------ |
+| `POST /books/:bookId/review`      | A user adds a review for a published book.      |
+| `PUT /books/:bookId/review/:reviewId`       | A user updates their review on a published book.           |
+| `DELETE /books/:bookId/review/:reviewId`       | A user deletes their review on a published book.         |
+
+#### Note:
+Reviewers can be any logged-in user, including the user who published the book. All logged-in users have the ability to leave a review on a published book.
+
+##  User Routes
+**1) Sign up a new User**
+
+Send a POST request to create a new user account.
+
+````
+Method: POST 
+URL: /register
+Content-Type: application/json
+````
+
+**EXAMPLE**
+* **Request:** POST /register
+* **Response:**
+```json
     {
-      "_id": ObjectId("88abc190ef0288abc190ef55"),
-      "title": "How to win friends and influence people",
-      "excerpt": "book body",
-      "userId": ObjectId("88abc190ef0288abc190ef02")
-      "category": "Book",
-      "reviews": 0,
-      "releasedAt": "2021-09-17T04:25:07.803Z"
-    },
-    {
-      "_id": ObjectId("88abc190ef0288abc190ef56"),
-      "title": "How to win friends and influence people",
-      "excerpt": "book body",
-      "userId": ObjectId("88abc190ef0288abc190ef02")
-      "category": "Book",
-      "reviews": 0,
-      "releasedAt": "2021-09-17T04:25:07.803Z"
+    "status": true,
+    "message": "New User created successfully",
+    "data": {
+        "title": "Mr",
+        "fullName": "Ram Sharma",
+        "phoneNumber": "9856543229",
+        "email": "ramSharma111@example.com",
+        "password": "Password123@!",
+        "address": {
+            "street": "123 Main Street",
+            "city": "New York",
+            "pincode": "808586"
+        },
+        "_id": "679a16df29b102d98053998f",
+        "createdAt": "2025-01-29T11:54:07.261Z",
+        "updatedAt": "2025-01-29T11:54:07.261Z",
+        "__v": 0
     }
-  ]
 }
 ```
 
-### Book details response
-```yaml
+**2) Login User**
+
+Send a POST request to log in an existing user.
+
+````
+Method: POST 
+URL: /login
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** POST /login
+* **Response:**
+```json
+ {
+    "status": true,
+    "message": "User Login Successfully",
+    "data": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzlhMTZkZjI5YjEwMmQ5ODA1Mzk5OGYiLCJpYXQiOjE3MzgxNTE3OTgsImV4cCI6MTczODE1NTM5OH0.o4BThjZyNi4ZCUTVKN8k56tD4Am2meTZLkIB1euRSXg"
+}
+```
+
+## Book Routes
+**1) Publish Book**
+
+Send a POST request to publish a new book.
+
+````
+Method: POST 
+URL: /books
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** POST /books
+* **Response:**
+```json
+ {
+    "status": true,
+    "message": "book is successfully published ",
+    "data": {
+        "title": "The Great Gatsby",
+        "preview": "A story of love, wealth, and the American Dream set in the Jazz Age of the 1920s.",
+        "userId": "679a16df29b102d98053998f",
+        "ISBN": "978-0-7432-7356-5",
+        "category": "Fiction",
+        "reviewCount": 0,
+        "isDeleted": false,
+        "releasedAt": "1925-04-10T00:00:00.000Z",
+        "_id": "679a192f29b102d980539997",
+        "createdAt": "2025-01-29T12:03:59.838Z",
+        "updatedAt": "2025-01-29T12:03:59.838Z",
+        "__v": 0
+    }
+}
+```
+
+**2) Get Published Books**
+
+**(i)** Send a GET request without filter query to Fetch a book details.
+
+````
+Method: GET
+URL: /books
+Authorization: x-api-key {token}
+Content-Type: application/json
+Purpose: This request is used to fetch a list of all published books, without any filters applied.
+````
+**EXAMPLE**
+* **Request:** GET /books
+* **Response:**
+```json
 {
-  status: true,
-  message: 'Books list',
-  data: {
-    "_id": ObjectId("88abc190ef0288abc190ef55"),
-    "title": "How to win friends and influence people",
-    "excerpt": "book body",
-    "userId": ObjectId("88abc190ef0288abc190ef02")
-    "category": "Book",
-    "subcategory": "Non fiction",
-    "isDeleted": false,
-    "reviews": 4,
-    "releasedAt": "2021-09-17T04:25:07.803Z"
-    "createdAt": "2021-09-17T04:25:07.803Z",
-    "updatedAt": "2021-09-17T04:25:07.803Z",
-    "reviewsData": [
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef88"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef89"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef90"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      },
-      {
-        "_id": ObjectId("88abc190ef0288abc190ef91"),
-        bookId: ObjectId("88abc190ef0288abc190ef55"),
-        reviewedBy: "Jane Doe",
-        reviewedAt: "2021-09-17T04:25:07.803Z",
-        rating: 4,
-        review: "An exciting nerving thriller. A gripping tale. A must read book."
-      }, 
+    "status": true,
+    "message": [
+        {
+            "_id": "679742e03bdee67fe2e7f8fc",
+            "title": " Kill a Mockingbird",
+            "preview": "A powerful tale of racial injustice and childhood innocence in the American South.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Classic Literature",
+            "releasedAt": "1960-07-11T00:00:00.000Z"
+        },
+        {
+            "_id": "6794c0f0403aed3c6de54b55",
+            "title": "1984",
+            "preview": "A dystopian novel by George Orwell that explores the consequences of a totalitarian regime, mass surveillance, and perpetual war, all set within a society that values control over freedom.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Dystopian",
+            "releasedAt": "1949-06-07T18:30:00.000Z"
+        },
+        {
+            "_id": "6794c05c403aed3c6de54b4b",
+            "title": "Great Gatb",
+            "preview": "This is a classic novel set in the Jazz Age, exploring themes of wealth, society, and the American Dream. The story is narrated by Nick Carraway, who observes the life of his mysterious neighbor, Jay Gatsby, and his obsession with Daisy Buchanan.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Fiction",
+            "releasedAt": "2001-04-09T18:30:00.000Z"
+        },
+        {
+            "_id": "6794c1bd403aed3c6de54b67",
+            "title": "Pride and Prejudice",
+            "preview": "This timeless novel by Jane Austen follows the headstrong Elizabeth Bennet and her developing relationship with the aloof Mr. Darcy, highlighting themes of class, marriage, and personal growth.",
+            "userId": "67938fe4fcc4edcdf2c1951b",
+            "category": "Romance",
+            "releasedAt": "2004-10-04T00:00:00.000Z"
+        },
+        {
+            "_id": "679a192f29b102d980539997",
+            "title": "The Great Gatsby",
+            "preview": "A story of love, wealth, and the American Dream set in the Jazz Age of the 1920s.",
+            "userId": "679a16df29b102d98053998f",
+            "category": "Fiction",
+            "releasedAt": "1925-04-10T00:00:00.000Z"
+        },
+        {
+            "_id": "6794c0d4403aed3c6de54b50",
+            "title": "To Kill a Mockingbird",
+            "preview": "Set in the Depression-era South, this novel focuses on the Finch family, particularly Scout Finch, and her father, lawyer Atticus Finch, as they navigate racism and injustice during a controversial trial.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Classic",
+            "releasedAt": "1960-11-06T18:30:00.000Z"
+        }
     ]
-  }
 }
 ```
 
-### Book details response no reviews
-```yaml
+**(ii)** Send a GET request with filter query to Fetch a book details.
+
+````
+Method: GET
+URL: /books
+Authorization: x-api-key {token}
+Content-Type: application/json
+Purpose: This request allows users to filter books based on userId and category values. The filter query can be used to narrow down the list of books that meet certain criteria.
+````
+**EXAMPLE**
+* **Request:** GET /books
+* **Response:**
+```json
 {
-  status: true,
-  message: 'Books list',
-  data: {
-    "_id": ObjectId("88abc190ef0288abc190ef55"),
-    "title": "How to win friends and influence people",
-    "excerpt": "book body",
-    "userId": ObjectId("88abc190ef0288abc190ef02")
-    "category": "Book",
-    "subcategory": "Non fiction",
-    "isDeleted": false,
-    "reviews": 0,
-    "releasedAt": "2021-09-17"
-    "createdAt": "2021-09-17T04:25:07.803Z",
-    "updatedAt": "2021-09-17T04:25:07.803Z",
-    "reviewsData": []
-  }
+    "status": true,
+    "message": [
+        {
+            "_id": "679742e03bdee67fe2e7f8fc",
+            "title": " Kill a Mockingbird",
+            "preview": "A powerful tale of racial injustice and childhood innocence in the American South.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Classic Literature",
+            "releasedAt": "1960-07-11T00:00:00.000Z"
+        },
+        {
+            "_id": "6794c0f0403aed3c6de54b55",
+            "title": "1984",
+            "preview": "A dystopian novel by George Orwell that explores the consequences of a totalitarian regime, mass surveillance, and perpetual war, all set within a society that values control over freedom.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Dystopian",
+            "releasedAt": "1949-06-07T18:30:00.000Z"
+        },
+        {
+            "_id": "6794c05c403aed3c6de54b4b",
+            "title": "Great Gatb",
+            "preview": "This is a classic novel set in the Jazz Age, exploring themes of wealth, society, and the American Dream. The story is narrated by Nick Carraway, who observes the life of his mysterious neighbor, Jay Gatsby, and his obsession with Daisy Buchanan.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Fiction",
+            "releasedAt": "2001-04-09T18:30:00.000Z"
+        }
+    ]
 }
+```
+
+
+**3) Get Published Books By its ObjectId**
+
+````
+Method: GET
+URL: /books/:bookId
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** GET /books/6794c0d4403aed3c6de54b50
+* **Response:**
+```json
+{
+    "status": true,
+    "message": "Books list",
+    "data": {
+        "bookDocument": {
+            "_id": "6794c0d4403aed3c6de54b50",
+            "title": "To Kill the Mockingbird",
+            "preview": "This is a classic novel set in the Jazz Age, exploring themes of wealt",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Classic",
+            "reviewCount": 5,
+            "isDeleted": false,
+            "releasedAt": "1960-11-06T18:30:00.000Z",
+            "createdAt": "2025-01-25T10:45:40.208Z",
+            "updatedAt": "2025-01-30T10:18:23.631Z",
+            "__v": 0
+        },
+        "reviewsData": [
+            {
+                "_id": "679b471c95120b19e9edeb4b",
+                "reviewedBy": "679b45736d7b63726d1a8171",
+                "reviewedAt": "2025-01-25T18:30:00.000Z",
+                "rating": 5,
+                "comment": "An excellent read! The author goes deep into the topic with clear examples. I couldn't put the book down and learned a lot from it. Highly recommended for beginners!"
+            }
+        ]
+    }
+}
+```
+
+**4) Update Published Books By its ObjectId**
+
+````
+Method: PUT
+URL: /books/:bookId
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** PUT /books/6794c0d4403aed3c6de54b50
+* **Response:**
+```json
+{
+    "status": true,
+    "message": "Success",
+    "data": {
+        "_id": "6794c0d4403aed3c6de54b50",
+        "title": "To Kill the Mockingbird",
+        "preview": "This is a classic novel set in the Jazz Age, exploring themes of wealt",
+        "userId": "67938b8c6f44fb6a09c8e074",
+        "ISBN": "978-0-06-112008-4",
+        "category": "Classic",
+        "reviewCount": 5,
+        "isDeleted": false,
+        "releasedAt": "1960-11-06T18:30:00.000Z",
+        "createdAt": "2025-01-25T10:45:40.208Z",
+        "updatedAt": "2025-01-30T10:50:32.026Z",
+        "__v": 0
+    }
+}
+```
+
+
+**5) Delete Published Books By its ObjectId**
+
+````
+Method: DELETE
+URL: /books/:bookId
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** DELETE /books/6794c0d4403aed3c6de54b50
+* **Response:**
+```json
+{
+    "message": "Deleted"
+}
+```
+
+## Review Routes
+**1) Create a review on Published book by its ObjectId**
+
+Send a POST request to leave a review on a published book.
+
+````
+Method: POST 
+URL: /books/:bookId/review
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** POST /books/6794c0f0403aed3c6de54b55/review
+* **Response:**
+```json
+ {
+    "status": true,
+    "msg": "Reviewes Added Succesfully",
+    "data": {
+        "book": "6794c0f0403aed3c6de54b55",
+        "reviewedBy": "679b49b6adf6b4d29f04ea21",
+        "reviewedAt": "2025-01-26T18:30:00.000Z",
+        "rating": 4,
+        "comment": "A chilling and insightful portrayal of a dystopian world where freedom is suppressed. A thought-provoking read that feels eerily relevant today",
+        "isDeleted": false,
+        "_id": "679b5e80648ab0ac98bc3f5e",
+        "createdAt": "2025-01-30T11:12:00.908Z",
+        "updatedAt": "2025-01-30T11:12:00.908Z",
+        "__v": 0
+    }
+}
+```
+
+**2) Update a Review on Published Book by its ObjectId**
+
+````
+Method: PUT 
+URL: /books/:bookId/review/:reviewId
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** PUT /books/6794c0f0403aed3c6de54b55/review/679b5e80648ab0ac98bc3f5e
+* **Response:**
+```json
+ {
+    "status": true,
+    "message": "successfully updated",
+    "data": {
+        "bookData": {
+            "_id": "6794c0f0403aed3c6de54b55",
+            "title": "1984",
+            "preview": "A dystopian novel by George Orwell that explores the consequences of a totalitarian regime, mass surveillance, and perpetual war, all set within a society that values control over freedom.",
+            "userId": "67938b8c6f44fb6a09c8e074",
+            "category": "Dystopian",
+            "reviewCount": 1,
+            "isDeleted": false,
+            "releasedAt": "1949-06-07T18:30:00.000Z",
+            "createdAt": "2025-01-25T10:46:08.656Z",
+            "updatedAt": "2025-01-30T11:12:00.973Z",
+            "__v": 0
+        },
+        "reviewsData": {
+            "_id": "679b5e80648ab0ac98bc3f5e",
+            "book": "6794c0f0403aed3c6de54b55",
+            "reviewedBy": "679b49b6adf6b4d29f04ea21",
+            "reviewedAt": "2025-01-26T18:30:00.000Z",
+            "rating": 5,
+            "comment": "A chilling and insightful portrayal of a dystopian world where freedom is suppressed. A thought-provoking read that feels eerily relevant today",
+            "isDeleted": false,
+            "createdAt": "2025-01-30T11:12:00.908Z",
+            "updatedAt": "2025-01-30T11:18:52.470Z",
+            "__v": 0
+        }
+    }
+}
+```
+
+**3) Delete a Review on Published Book by its ObjectId**
+
+````
+Method: DELETE 
+URL: DELETE /books/6794c0f0403aed3c6de54b55/review/679b5e80648ab0ac98bc3f5e
+Authorization: x-api-key {token}
+Content-Type: application/json
+````
+**EXAMPLE**
+* **Request:** PUT /books/:bookId/review/:reviewId
+* **Response:**
+```json
+{
+    "status": true,
+    "message": "review has been deleted successfully"
+}
+```
